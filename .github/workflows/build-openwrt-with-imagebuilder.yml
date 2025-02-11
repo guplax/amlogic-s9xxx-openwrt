@@ -27,7 +27,7 @@ on:
       openwrt_board:
         description: "Select device board"
         required: false
-        default: "all"
+        default: "s905x"
         type: choice
         options:
           - all
@@ -182,7 +182,7 @@ on:
       openwrt_kernel:
         description: "Select kernel version"
         required: false
-        default: "6.1.y_6.6.y"
+        default: "6.6.y"
         type: choice
         options:
           - 5.4.y
@@ -203,9 +203,10 @@ on:
       kernel_repo:
         description: "Set the kernel repository"
         required: false
-        default: "ophub/kernel"
+        default: "guplax/amlogic-s9xxx-armbian"
         type: choice
         options:
+          - guplax/amlogic-s9xxx-armbian
           - ophub/kernel
       kernel_usage:
         description: "Set the tags of the stable kernel."
@@ -220,9 +221,10 @@ on:
       builder_name:
         description: "Set OpenWrt builder signature."
         required: false
-        default: "ophub"
+        default: "guplax"
         type: choice
         options:
+          - guplax
           - ophub
           - angel
           - yourname
@@ -297,12 +299,12 @@ jobs:
           rm -rf $(ls . | grep -v "^bin$" | xargs) 2>/dev/null
 
           [[ -d "/builder/openwrt" ]] || mkdir -p /builder/openwrt
-          ln -sf /builder/openwrt /home/runner/work/_actions/ophub/amlogic-s9xxx-openwrt/main/openwrt
+          ln -sf /builder/openwrt /home/runner/work/_actions/guplax/amlogic-s9xxx-openwrt/main/openwrt
           df -hT ${PWD}
 
       - name: Packaging OpenWrt
         if: ${{ steps.imagebuilder.outputs.status }} == 'success' && !cancelled()
-        uses: ophub/amlogic-s9xxx-openwrt@main
+        uses: guplax/amlogic-s9xxx-openwrt@main
         with:
           openwrt_path: imagebuilder/bin/targets/*/*/*rootfs.tar.gz
           openwrt_board: ${{ inputs.openwrt_board }}

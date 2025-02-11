@@ -74,13 +74,23 @@ download_imagebuilder() {
         target_profile="Default"
     fi
 
+    if [[ "${op_branch:0:2}" -ge "24" && "${op_branch:3:2}" -ge "10" ]]; then
+        archive_format="zst"
+    else
+        archive_format="xz"
+    fi
+
     # Downloading imagebuilder files
-    download_file="https://downloads.${op_sourse}.org/releases/${op_branch}/targets/${target_system}/${op_sourse}-imagebuilder-${op_branch}-${target_name}.Linux-x86_64.tar.xz"
+    download_file="https://downloads.${op_sourse}.org/releases/${op_branch}/targets/${target_system}/${op_sourse}-imagebuilder-${op_branch}-${target_name}.Linux-x86_64.tar.${archive_format}"
     curl -fsSOL ${download_file}
     [[ "${?}" -eq "0" ]] || error_msg "Download failed: [ ${download_file} ]"
 
     # Unzip and change the directory name
-    tar -xJf *-imagebuilder-* && sync && rm -f *-imagebuilder-*.tar.xz
+    if [[ "${op_branch:0:2}" -ge "24" && "${op_branch:3:2}" -ge "10" ]]; then
+        tar -x --zstd -f *-imagebuilder-* && sync && rm -f *-imagebuilder-*.tar.zst
+    else
+        tar -xJf *-imagebuilder-* && sync && rm -f *-imagebuilder-*.tar.xz
+    fi
     mv -f *-imagebuilder-* ${openwrt_dir}
 
     sync && sleep 3
@@ -198,7 +208,7 @@ rebuild_firmware() {
         \
         luci luci-base luci-compat luci-i18n-base-zh-cn luci-lib-base luci-lib-docker \
         luci-lib-ip luci-lib-ipkg luci-lib-jsonc luci-lib-nixio luci-mod-admin-full luci-mod-network \
-        luci-mod-status luci-mod-system luci-proto-3g luci-proto-bonding luci-proto-ipip luci-proto-ipv6 \
+        luci-mod-status luci-mod-system luci-proto-3g luci-proto-ipip luci-proto-ipv6 \
         luci-proto-ncm luci-proto-openconnect luci-proto-ppp luci-proto-qmi luci-proto-relay \
         \
         luci-app-amlogic luci-i18n-amlogic-zh-cn \
