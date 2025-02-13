@@ -74,13 +74,23 @@ download_imagebuilder() {
         target_profile="Default"
     fi
 
+    if [[ "${op_branch:0:2}" -ge "24" && "${op_branch:3:2}" -ge "10" ]]; then
+        archive_format="zst"
+    else
+        archive_format="xz"
+    fi
+
     # Downloading imagebuilder files
-    download_file="https://downloads.${op_sourse}.org/releases/${op_branch}/targets/${target_system}/${op_sourse}-imagebuilder-${op_branch}-${target_name}.Linux-x86_64.tar.xz"
+    download_file="https://downloads.${op_sourse}.org/releases/${op_branch}/targets/${target_system}/${op_sourse}-imagebuilder-${op_branch}-${target_name}.Linux-x86_64.tar.${archive_format}"
     curl -fsSOL ${download_file}
     [[ "${?}" -eq "0" ]] || error_msg "Download failed: [ ${download_file} ]"
 
     # Unzip and change the directory name
-    tar -xJf *-imagebuilder-* && sync && rm -f *-imagebuilder-*.tar.xz
+    if [[ "${op_branch:0:2}" -ge "24" && "${op_branch:3:2}" -ge "10" ]]; then
+        tar -x --zstd -f *-imagebuilder-* && sync && rm -f *-imagebuilder-*.tar.zst
+    else
+        tar -xJf *-imagebuilder-* && sync && rm -f *-imagebuilder-*.tar.xz
+    fi
     mv -f *-imagebuilder-* ${openwrt_dir}
 
     sync && sleep 3
@@ -100,6 +110,10 @@ adjust_settings() {
         sed -i "s|CONFIG_TARGET_ROOTFS_EXT4FS=.*|# CONFIG_TARGET_ROOTFS_EXT4FS is not set|g" .config
         sed -i "s|CONFIG_TARGET_ROOTFS_SQUASHFS=.*|# CONFIG_TARGET_ROOTFS_SQUASHFS is not set|g" .config
         sed -i "s|CONFIG_TARGET_IMAGES_GZIP=.*|# CONFIG_TARGET_IMAGES_GZIP is not set|g" .config
+        # default-settings-chn packages
+        sed -i "s|CONFIG_DEFAULT_default-settings-chn=.*|# CONFIG_DEFAULT_default-settings-chn is not set|g" .config
+        sed -i "s|CONFIG_MODULE_DEFAULT_default-settings-chn=.*|# CONFIG_MODULE_DEFAULT_default-settings-chn is not set|g" .config
+        sed -i "s|CONFIG_PACKAGE_default-settings-chn=.*|# CONFIG_PACKAGE_default-settings-chn is not set|g" .config
     else
         echo -e "${INFO} [ ${imagebuilder_path} ] directory status: $(ls -al 2>/dev/null)"
         error_msg "There is no .config file in the [ ${download_file} ]"
@@ -140,6 +154,9 @@ custom_packages() {
 
     # Download other luci-app-xxx
     # ......
+
+    # Copy ipk
+    cp -vf "${make_path}/config/ipk"/*.ipk .
 
     sync && sleep 3
     echo -e "${INFO} [ packages ] directory status: $(ls -al 2>/dev/null)"
@@ -185,29 +202,31 @@ rebuild_firmware() {
 
     # Selecting default packages, lib, theme, app and i18n, etc.
     my_packages="\
-        acpid attr base-files bash bc blkid block-mount blockd bsdtar btrfs-progs busybox bzip2 \
-        cgi-io chattr comgt comgt-ncm containerd coremark coreutils coreutils-base64 coreutils-nohup \
-        coreutils-truncate curl docker docker-compose dockerd dosfstools dumpe2fs e2freefrag e2fsprogs \
-        exfat-mkfs f2fs-tools f2fsck fdisk gawk getopt git gzip hostapd-common iconv iw iwinfo jq \
-        jshn kmod-brcmfmac kmod-brcmutil kmod-cfg80211 kmod-mac80211 libjson-script liblucihttp \
-        liblucihttp-lua losetup lsattr lsblk lscpu mkf2fs mount-utils openssl-util parted \
+        attendedsysupgrade-common autocore automount base-files blkid block-mount busybox ca-bundle cgi-io default-settings -default-settings-chn dnsmasq-full dropbear e2fsprogs firewall4 fstools fwtool getrandom grub2-efi-arm jshn jsonfilter kernel kmod-acpi-mdio kmod-amazon-ena kmod-asn1-decoder kmod-atlantic kmod-bcmgenet kmod-crypto-acompress kmod-crypto-aead kmod-crypto-arc4 kmod-crypto-crc32 kmod-crypto-crc32c kmod-crypto-ctr kmod-crypto-ecb kmod-crypto-gcm kmod-crypto-geniv kmod-crypto-gf128 kmod-crypto-ghash kmod-crypto-hash kmod-crypto-hmac kmod-crypto-manager kmod-crypto-null kmod-crypto-rng kmod-crypto-seqiv kmod-crypto-sha1 kmod-crypto-sha3 kmod-crypto-sha512 kmod-crypto-user kmod-dwmac-imx kmod-dwmac-rockchip kmod-dwmac-sun8i kmod-e1000 kmod-e1000e kmod-fixed-phy kmod-fs-exfat kmod-fs-ext4 kmod-fsl-dpaa1-net kmod-fsl-dpaa2-net kmod-fsl-enetc-net kmod-fsl-fec kmod-fsl-mc-dpio kmod-fsl-pcs-lynx kmod-fsl-xgmac-mdio kmod-fs-ntfs3 kmod-fs-vfat kmod-gpio-pca953x kmod-hwmon-core kmod-i2c-core kmod-i2c-mux kmod-i2c-mux-pca954x kmod-lib-crc16 kmod-lib-crc32c kmod-lib-crc-ccitt kmod-lib-lzo kmod-libphy kmod-lib-textsearch kmod-macsec kmod-macvlan kmod-marvell-mdio kmod-mdio-bcm-unimac kmod-mdio-bus-mux kmod-mdio-devres kmod-mdio-gpio kmod-mdio-thunder kmod-mii kmod-mppe kmod-mvneta kmod-mvpp2 kmod-net-selftests kmod-nf-conntrack kmod-nf-conntrack6 kmod-nf-conntrack-netlink kmod-nf-flow kmod-nf-log kmod-nf-log6 kmod-nf-nat kmod-nf-nathelper kmod-nf-nathelper-extra kmod-nfnetlink kmod-nf-reject kmod-nf-reject6 kmod-nft-core kmod-nft-fib kmod-nft-fullcone kmod-nft-nat kmod-nft-offload kmod-nls-base kmod-nls-cp437 kmod-nls-iso8859-1 kmod-nls-utf8 kmod-octeontx2-net kmod-of-mdio kmod-pcs-xpcs kmod-phy-aquantia kmod-phy-broadcom kmod-phylib-broadcom kmod-phylink kmod-phy-marvell kmod-phy-marvell-10g kmod-phy-realtek kmod-phy-smsc kmod-ppp kmod-pppoe kmod-pppox kmod-pps kmod-ptp kmod-regmap-core kmod-regmap-i2c kmod-renesas-net-avb kmod-rtc-rx8025 kmod-scsi-core kmod-sfp kmod-slhc kmod-stmmac-core kmod-thunderx-net kmod-usb-core kmod-usb-storage kmod-usb-storage-extras kmod-usb-storage-uas kmod-vmxnet3 kmod-wdt-sp805 libc libgcc libiwinfo-data liblucihttp-lua liblucihttp-ucode libopenssl libpthread librt libubus-lua libudebug logd lua luci luci-app-attendedsysupgrade luci-app-firewall luci-app-package-manager luci-base luci-compat luci-i18n-base-zh-cn luci-lib-base luci-lib-ip luci-lib-ipkg luci-lib-jsonc luci-lib-nixio luci-light luci-lua-runtime luci-mod-admin-full luci-mod-network luci-mod-status luci-mod-system luci-proto-ipv6 luci-proto-ppp luci-theme-bootstrap mkf2fs mtd netifd nftables-json ntfs3-mount odhcp6c odhcpd-ipv6only openwrt-keyring opkg partx-utils ppp ppp-mod-pppoe procd procd-seccomp procd-ujail rpcd rpcd-mod-file rpcd-mod-iwinfo rpcd-mod-luci rpcd-mod-rpcsys rpcd-mod-rrdns rpcd-mod-ucode shellsync ubox ubus ubusd uci uclient-fetch ucode ucode-mod-fs ucode-mod-html ucode-mod-lua ucode-mod-math ucode-mod-ubus ucode-mod-uci uhttpd uhttpd-mod-ubus urandom-seed urngd usign \
+        \
+        jansson libblkid libblobmsg-json libcomerr libe2p libext2fs libf2fs libgmp libiwinfo libjson-c libjson-script liblua liblucihttp libmnl libnetfilter-conntrack libnettle libnfnetlink libnftnl libnl-tiny libsmartcols libss libubox libubus libuci libuclient libucode libustream-openssl libuuid luci-i18n-attendedsysupgrade-zh-cn luci-i18n-firewall-zh-cn luci-i18n-package-manager-zh-cn \
+        \
+        libzstd btrfs-progs fdisk losetup lsblk parted perl uuidgen \
+        \
         perl-http-date perlbase-file perlbase-getopt perlbase-time perlbase-unicode perlbase-utf8 \
-        pigz ppp ppp-mod-pppoe proto-bonding pv rename resize2fs runc tar tini ttyd tune2fs \
-        uclient-fetch uhttpd uhttpd-mod-ubus unzip uqmi usb-modeswitch uuidgen wget-ssl whereis \
-        which wpad-basic wwan xfs-fsck xfs-mkfs xz xz-utils ziptool zoneinfo-asia zoneinfo-core zstd \
         \
-        luci luci-base luci-compat luci-i18n-base-zh-cn luci-lib-base luci-lib-docker \
-        luci-lib-ip luci-lib-ipkg luci-lib-jsonc luci-lib-nixio luci-mod-admin-full luci-mod-network \
-        luci-mod-status luci-mod-system luci-proto-3g luci-proto-bonding luci-proto-ipip luci-proto-ipv6 \
-        luci-proto-ncm luci-proto-openconnect luci-proto-ppp luci-proto-qmi luci-proto-relay \
+        attr chattr lsattr dosfstools f2fs-tools f2fsck xfs-fsck xfs-mkfs \
+        bsdtar pigz bash gawk getopt tar acpid luci-theme-material \
         \
-        luci-app-amlogic luci-i18n-amlogic-zh-cn \
+        kmod-brcmfmac kmod-brcmutil kmod-cfg80211 kmod-mac80211 \
         \
-        ${config_list} \
+        wpa-cli wpad-openssl iw openssh-sftp-server adguardhome \
+        \
+        modemmanager luci-proto-modemmanager \
+        uqmi luci-proto-qmi qmi-utils \
+        kmod-usb-serial kmod-usb-serial-wwan kmod-usb-serial-option kmod-usb-serial-qualcomm kmod-usb-serial-sierrawireless \
+        kmod-usb-net kmod-usb-wdm kmod-usb-net-qmi-wwan \
+	\
+	luci-app-amlogic luci-i18n-amlogic-zh-cn \
         "
 
     # Rebuild firmware
-    make image PROFILE="${target_profile}" PACKAGES="${my_packages}" FILES="files"
+    make image PROFILE="" PACKAGES="${my_packages}" FILES="files"
 
     sync && sleep 3
     echo -e "${INFO} [ ${openwrt_dir}/bin/targets/*/* ] directory status: $(ls bin/targets/*/* -al 2>/dev/null)"

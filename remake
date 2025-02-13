@@ -70,7 +70,7 @@ arch_info="$(uname -m)"
 host_release="$(cat /etc/os-release | grep '^VERSION_CODENAME=.*' | cut -d'=' -f2)"
 # Add custom OpenWrt firmware information
 op_release="etc/flippy-openwrt-release"
-ophub_release_file="etc/ophub-release"
+guplax_release_file="etc/guplax-release"
 
 # Dependency files download repository
 depends_repo="https://github.com/ophub/amlogic-s9xxx-armbian"
@@ -956,60 +956,8 @@ refactor_rootfs() {
     # Turn off speed limit by default
     [[ -f "etc/config/nft-qos" ]] && sed -i "s|option limit_enable.*|option limit_enable '0'|g" etc/config/nft-qos
 
-    # Add USB and wireless network drivers
-    [[ -f "etc/modules.d/usb-net-rtl8150" ]] || echo "rtl8150" >etc/modules.d/usb-net-rtl8150
-    # USB RTL8152/8153/8156 network card Driver
-    [[ -f "etc/modules.d/usb-net-rtl8152" ]] || echo "r8152" >etc/modules.d/usb-net-rtl8152
-    # USB AX88179 network card Driver
-    [[ -f "etc/modules.d/usb-net-asix-ax88179" ]] || echo "ax88179_178a" >etc/modules.d/usb-net-asix-ax88179
-    # brcmfmac built-in wireless network card Driver
-    echo "brcmfmac" >etc/modules.d/brcmfmac
-    echo "brcmutil" >etc/modules.d/brcmutil
-    echo "bcmdhd" >etc/modules.d/bcmdhd
-    # USB Realtek RTL8188EU Wireless LAN Driver
-    echo "r8188eu" >etc/modules.d/rtl8188eu
     # Realtek RTL8189FS Wireless LAN Driver
     echo "8189fs" >etc/modules.d/8189fs
-    # Realtek RTL8188FU Wireless LAN Driver
-    echo "rtl8188fu" >etc/modules.d/rtl8188fu
-    # Realtek RTL8822CS Wireless LAN Driver
-    echo "88x2cs" >etc/modules.d/88x2cs
-    # USB Ralink Wireless LAN Driver
-    echo "rt2500usb" >etc/modules.d/rt2500-usb
-    echo "rt2800usb" >etc/modules.d/rt2800-usb
-    echo "rt2x00usb" >etc/modules.d/rt2x00-usb
-    # USB Mediatek Wireless LAN Driver
-    echo "mt7601u" >etc/modules.d/mt7601u
-    echo "mt7663u" >etc/modules.d/mt7663u
-    echo "mt76x0u" >etc/modules.d/mt76x0u
-    echo "mt76x2u" >etc/modules.d/mt76x2u
-    echo "mt76x2e" >etc/modules.d/mt76x2e
-    echo "mt7921e" >etc/modules.d/mt7921e
-    echo "mt7915e" >etc/modules.d/mt7915e
-
-    # GPU Driver
-    echo "panfrost" >etc/modules.d/panfrost
-    # PWM Driver
-    echo "pwm_meson" >etc/modules.d/pwm_meson
-    # Ath10k Driver
-    echo "ath10k_core" >etc/modules.d/ath10k_core
-    echo "ath10k_sdio" >etc/modules.d/ath10k_sdio
-    echo "ath10k_usb" >etc/modules.d/ath10k_usb
-    echo "ath10k_pci" >etc/modules.d/ath10k-pci
-    echo "ath10k_core frame_mode=2" >etc/modules.d/ath10k
-    # Enable watchdog driver
-    echo "meson_gxbb_wdt" >etc/modules.d/watchdog
-    # For rk3588
-    echo "bifrost_kbase" >etc/modules.d/rk_gpu
-    echo "rknpu" >etc/modules.d/rk_npu
-    # For rk3568
-    echo "rockchipdrm" >etc/modules.d/drm-rockchip
-    echo "rk_crypto2" >etc/modules.d/rk_crypto
-    echo -e "snd_soc_simple_card_utils\nsnd_soc_simple_card\nsnd_soc_rockchip_i2s" >etc/modules.d/snd-rk3568
-    echo "pwm_fan" >etc/modules.d/pwm-fan
-    echo "option" >etc/modules.d/usb-serial-option
-    # For rk3328
-    echo -e "snd_soc_simple_card_utils\nsnd_soc_simple_card\nsnd_soc_rockchip_i2s" >etc/modules.d/snd-rk3328
 
     # Add blacklist
     mkdir -p etc/modprobe.d
@@ -1082,13 +1030,6 @@ EOF
 
     # Add firmware version information to the terminal page
     [[ -n "${builder_name}" ]] && builder_display="Builder Name: ${builder_name} | " || builder_display=""
-    [[ -f "etc/banner" ]] && {
-        echo " Install OpenWrt: System → Amlogic Service → Install OpenWrt" >>etc/banner
-        echo " Update  OpenWrt: System → Amlogic Service → Online  Update" >>etc/banner
-        echo " Board: ${board} | OpenWrt Kernel: ${kernel_name}" >>etc/banner
-        echo " ${builder_display}Production Date: $(date +%Y-%m-%d)" >>etc/banner
-        echo "───────────────────────────────────────────────────────────────────────" >>etc/banner
-    }
 
     # Add firmware information
     echo "PLATFORM='${PLATFORM}'" >>${op_release}
@@ -1118,7 +1059,7 @@ EOF
     echo "CONTRIBUTORS='${CONTRIBUTORS}'" >>${op_release}
     echo "PACKAGED_DATE='$(date +%Y-%m-%d)'" >>${op_release}
     # Creating an Alias
-    ln -sf ${op_release#*/} ${ophub_release_file}
+    ln -sf ${op_release#*/} ${guplax_release_file}
 
     # Remove the menus that are not applicable in the model
     install_menu=$(echo "${model_txt}" | awk -F'/' '{print $(NF-1)"/"$NF}')
