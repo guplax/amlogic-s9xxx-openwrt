@@ -215,9 +215,12 @@ rebuild_firmware() {
         \
         kmod-brcmfmac kmod-brcmutil kmod-cfg80211 kmod-mac80211 \
         \
-        libcurl curl \
-        wpa-cli wpad-openssl iw openssh-sftp-server adguardhome \
+        libcares libcurl curl \
+        wpa-cli wpad-openssl iw \
+	screen openssh-sftp-server adguardhome \
         \
+	ip-full ruby ruby-yaml kmod-tun unzip kmod-inet-diag kmod-nft-tproxy \
+	\
         modemmanager luci-proto-modemmanager \
         uqmi luci-proto-qmi qmi-utils \
         kmod-usb-serial kmod-usb-serial-wwan kmod-usb-serial-qualcomm \
@@ -249,7 +252,7 @@ echo -e "${INFO} Server space usage before starting to compile: \n$(df -hT ${mak
 download_imagebuilder
 adjust_settings
 custom_packages
-custom_config
+#custom_config
 custom_files
 rebuild_firmware
 #
