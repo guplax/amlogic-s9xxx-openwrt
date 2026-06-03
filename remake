@@ -1107,7 +1107,7 @@ refactor_rootfs() {
     # USB Realtek RTL8188EU Wireless LAN Driver
     echo "r8188eu" >etc/modules.d/rtl8188eu
     # Realtek RTL8189FS Wireless LAN Driver
-    echo "8189fs" >etc/modules.d/8189fs
+    #echo "8189fs" >etc/modules.d/8189fs
     # Realtek RTL8188FU Wireless LAN Driver
     echo "rtl8188fu" >etc/modules.d/rtl8188fu
     # Realtek RTL8822CS Wireless LAN Driver
