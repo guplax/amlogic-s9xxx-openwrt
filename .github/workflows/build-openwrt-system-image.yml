@@ -288,10 +288,6 @@ on:
           - stable
           - flippy
           - beta
-      openwrt_ip:
-        description: "Set OpenWrt default IP address."
-        required: false
-        default: "192.168.1.1"
       use_ccache:
         description: "Auto use ccache."
         required: false
@@ -457,7 +453,7 @@ jobs:
           [[ -e "${CONFIG_FILE}" ]] && cp -f ${CONFIG_FILE} openwrt/.config
           chmod +x ${DIY_P2_SH}
           cd openwrt/
-          ${{ github.workspace }}/${DIY_P2_SH} "${{ inputs.openwrt_ip }}" "${{ inputs.use_ccache }}"
+          ${{ github.workspace }}/${DIY_P2_SH} "${{ inputs.use_ccache }}"
 
       - name: Download package
         id: package
@@ -538,7 +534,6 @@ jobs:
         uses: guplax/amlogic-s9xxx-openwrt@emortal
         with:
           openwrt_path: openwrt/output/*rootfs.tar.gz
-          openwrt_ip: ${{ inputs.openwrt_ip }}
           openwrt_board: ${{ inputs.openwrt_board }}
           openwrt_kernel: ${{ inputs.openwrt_kernel }}
           auto_kernel: ${{ inputs.auto_kernel }}
@@ -561,8 +556,7 @@ jobs:
             ### OpenWrt Image Information
             - Default IP: `192.168.1.1`
             - Default username: `root`
-            - Default password: `password`
-            - Default WIFI name: `OpenWrt`
+            - Default WIFI name: `ImmortalWrt`
             - Default WIFI password: `none`
             ### Install to EMMC
             - Login to OpenWrt → `System` → `Amlogic Service` → `Install OpenWrt`

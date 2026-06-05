@@ -1036,6 +1036,13 @@ refactor_bootfs() {
             "${armbianenv_conf_file}"
     }
 
+    # Edit the console resolution
+    [[ -f "${uenv_conf_file}" ]] && {
+        sed -i \
+            -e "s|1920x1080|1366x768|g" \
+            "${uenv_conf_file}"
+    }
+
     # Check device configuration files
     [[ -f "${uenv_conf_file}" || -f "${rename_extlinux_file}" || -f "${armbianenv_conf_file}" ]] || error_msg "Missing boot configuration file [ /boot/*Env.txt ]."
 }
@@ -1048,9 +1055,9 @@ refactor_rootfs() {
     mkdir -p .reserved boot run
 
     # Set default IP address
-    [[ "${openwrt_ip}" != "192.168.1.1" && -f "bin/config_generate" ]] && {
-        sed -i "/lan) ipad=\${ipaddr:-/s/\${ipaddr:-\"[^\"]*\"}/\${ipaddr:-\"${openwrt_ip}\"}/" bin/config_generate
-    }
+    #[[ "${openwrt_ip}" != "192.168.1.1" && -f "bin/config_generate" ]] && {
+    #    sed -i "/lan) ipad=\${ipaddr:-/s/\${ipaddr:-\"[^\"]*\"}/\${ipaddr:-\"${openwrt_ip}\"}/" bin/config_generate
+    #}
 
     # Edit fstab
     [[ -f "etc/fstab" && -f "etc/config/fstab" ]] || error_msg "The [ fstab ] files do not exist."
@@ -1074,80 +1081,84 @@ refactor_rootfs() {
     }
 
     # Turn off hw_flow by default
-    [[ -f "etc/config/turboacc" ]] && {
-        sed -i "s|option hw_flow.*|option hw_flow '0'|g" etc/config/turboacc
-        sed -i "s|option sw_flow.*|option sw_flow '0'|g" etc/config/turboacc
-    }
+    #[[ -f "etc/config/turboacc" ]] && {
+    #    sed -i "s|option hw_flow.*|option hw_flow '0'|g" etc/config/turboacc
+    #    sed -i "s|option sw_flow.*|option sw_flow '0'|g" etc/config/turboacc
+    #}
 
     # Add custom startup script
-    custom_startup_script="etc/custom_service/start_service.sh"
-    [[ -x "${custom_startup_script}" && -f "etc/rc.local" ]] && {
-        sed -i '/^exit 0/i\bash /etc/custom_service/start_service.sh &' etc/rc.local
-    }
+    #custom_startup_script="etc/custom_service/start_service.sh"
+    #[[ -x "${custom_startup_script}" && -f "etc/rc.local" ]] && {
+    #    sed -i '/^exit 0/i\bash /etc/custom_service/start_service.sh &' etc/rc.local
+    #}
 
     # Modify the cpu mode to schedutil
-    [[ -f "etc/config/cpufreq" ]] && sed -i "s|ondemand|schedutil|" etc/config/cpufreq
+    #[[ -f "etc/config/cpufreq" ]] && sed -i "s|ondemand|schedutil|" etc/config/cpufreq
 
     # Turn off speed limit by default
-    [[ -f "etc/config/nft-qos" ]] && sed -i "s|option limit_enable.*|option limit_enable '0'|g" etc/config/nft-qos
+    #[[ -f "etc/config/nft-qos" ]] && sed -i "s|option limit_enable.*|option limit_enable '0'|g" etc/config/nft-qos
 
     # Disable the OpenSSL acceleration engine
-    [[ -f "etc/ssl/openssl.cnf" ]] && sed -i "s|^engines = engines_sect|#engines = engines_sect|g" etc/ssl/openssl.cnf
+    #[[ -f "etc/ssl/openssl.cnf" ]] && sed -i "s|^engines = engines_sect|#engines = engines_sect|g" etc/ssl/openssl.cnf
 
     # Add USB and wireless network drivers
-    [[ -f "etc/modules.d/usb-net-rtl8150" ]] || echo "rtl8150" >etc/modules.d/usb-net-rtl8150
+    #[[ -f "etc/modules.d/usb-net-rtl8150" ]] || echo "rtl8150" >etc/modules.d/usb-net-rtl8150
     # USB RTL8152/8153/8156 network card Driver
-    [[ -f "etc/modules.d/usb-net-rtl8152" ]] || echo "r8152" >etc/modules.d/usb-net-rtl8152
+    #[[ -f "etc/modules.d/usb-net-rtl8152" ]] || echo "r8152" >etc/modules.d/usb-net-rtl8152
     # USB AX88179 network card Driver
-    [[ -f "etc/modules.d/usb-net-asix-ax88179" ]] || echo "ax88179_178a" >etc/modules.d/usb-net-asix-ax88179
+    #[[ -f "etc/modules.d/usb-net-asix-ax88179" ]] || echo "ax88179_178a" >etc/modules.d/usb-net-asix-ax88179
     # brcmfmac built-in wireless network card Driver
-    echo "brcmfmac" >etc/modules.d/brcmfmac
-    echo "brcmutil" >etc/modules.d/brcmutil
-    echo "bcmdhd" >etc/modules.d/bcmdhd
+    #echo "brcmfmac" >etc/modules.d/brcmfmac
+    #echo "brcmutil" >etc/modules.d/brcmutil
+    #echo "bcmdhd" >etc/modules.d/bcmdhd
     # USB Realtek RTL8188EU Wireless LAN Driver
-    echo "r8188eu" >etc/modules.d/rtl8188eu
+    #echo "r8188eu" >etc/modules.d/rtl8188eu
     # Realtek RTL8189FS Wireless LAN Driver
     echo "8189fs" >etc/modules.d/8189fs
     # Realtek RTL8188FU Wireless LAN Driver
-    echo "rtl8188fu" >etc/modules.d/rtl8188fu
+    #echo "rtl8188fu" >etc/modules.d/rtl8188fu
     # Realtek RTL8822CS Wireless LAN Driver
-    echo "rtw88_8822cs" >etc/modules.d/rtw88_8822cs
+    #echo "rtw88_8822cs" >etc/modules.d/rtw88_8822cs
     # USB Ralink Wireless LAN Driver
-    echo "rt2500usb" >etc/modules.d/rt2500-usb
-    echo "rt2800usb" >etc/modules.d/rt2800-usb
-    echo "rt2x00usb" >etc/modules.d/rt2x00-usb
+    #echo "rt2500usb" >etc/modules.d/rt2500-usb
+    #echo "rt2800usb" >etc/modules.d/rt2800-usb
+    #echo "rt2x00usb" >etc/modules.d/rt2x00-usb
     # USB Mediatek Wireless LAN Driver
-    echo "mt7601u" >etc/modules.d/mt7601u
-    echo "mt7663u" >etc/modules.d/mt7663u
-    echo "mt76x0u" >etc/modules.d/mt76x0u
-    echo "mt76x2u" >etc/modules.d/mt76x2u
-    echo "mt76x2e" >etc/modules.d/mt76x2e
-    echo "mt7921e" >etc/modules.d/mt7921e
-    echo "mt7915e" >etc/modules.d/mt7915e
+    #echo "mt7601u" >etc/modules.d/mt7601u
+    #echo "mt7663u" >etc/modules.d/mt7663u
+    #echo "mt76x0u" >etc/modules.d/mt76x0u
+    #echo "mt76x2u" >etc/modules.d/mt76x2u
+    #echo "mt76x2e" >etc/modules.d/mt76x2e
+    #echo "mt7921e" >etc/modules.d/mt7921e
+    #echo "mt7915e" >etc/modules.d/mt7915e
 
     # GPU Driver
-    echo "panfrost" >etc/modules.d/panfrost
+    #echo "panfrost" >etc/modules.d/panfrost
+    echo "lima" >etc/modules.d/lima
     # PWM Driver
     echo "pwm_meson" >etc/modules.d/pwm_meson
     # Ath10k Driver
-    echo "ath10k_core" >etc/modules.d/ath10k_core
-    echo "ath10k_sdio" >etc/modules.d/ath10k_sdio
-    echo "ath10k_usb" >etc/modules.d/ath10k_usb
-    echo "ath10k_pci" >etc/modules.d/ath10k-pci
-    echo "ath10k_core frame_mode=2" >etc/modules.d/ath10k
+    #echo "ath10k_core" >etc/modules.d/ath10k_core
+    #echo "ath10k_sdio" >etc/modules.d/ath10k_sdio
+    #echo "ath10k_usb" >etc/modules.d/ath10k_usb
+    #echo "ath10k_pci" >etc/modules.d/ath10k-pci
+    #echo "ath10k_core frame_mode=2" >etc/modules.d/ath10k
     # Enable watchdog driver
-    echo "meson_gxbb_wdt" >etc/modules.d/watchdog
+    #echo "meson_gxbb_wdt" >etc/modules.d/watchdog
     # For rk3588
-    echo "bifrost_kbase" >etc/modules.d/rk_gpu
-    echo "rknpu" >etc/modules.d/rk_npu
+    #echo "bifrost_kbase" >etc/modules.d/rk_gpu
+    #echo "rknpu" >etc/modules.d/rk_npu
     # For rk3568
-    echo "rockchipdrm" >etc/modules.d/drm-rockchip
-    echo "rk_crypto2" >etc/modules.d/rk_crypto
-    echo -e "snd_soc_simple_card_utils\nsnd_soc_simple_card\nsnd_soc_rockchip_i2s" >etc/modules.d/snd-rk3568
-    echo "pwm_fan" >etc/modules.d/pwm-fan
-    echo "option" >etc/modules.d/usb-serial-option
+    #echo "rockchipdrm" >etc/modules.d/drm-rockchip
+    #echo "rk_crypto2" >etc/modules.d/rk_crypto
+    #echo -e "snd_soc_simple_card_utils\nsnd_soc_simple_card\nsnd_soc_rockchip_i2s" >etc/modules.d/snd-rk3568
+    #echo "pwm_fan" >etc/modules.d/pwm-fan
+    #echo "option" >etc/modules.d/usb-serial-option
     # For rk3328
-    echo -e "snd_soc_simple_card_utils\nsnd_soc_simple_card\nsnd_soc_rockchip_i2s" >etc/modules.d/snd-rk3328
+    #echo -e "snd_soc_simple_card_utils\nsnd_soc_simple_card\nsnd_soc_rockchip_i2s" >etc/modules.d/snd-rk3328
+
+    # Amlogic Meson IR remote receiver
+    echo "meson-ir" >etc/modules.d/meson-ir
 
     # Add blacklist
     mkdir -p etc/modprobe.d
@@ -1173,23 +1184,23 @@ EOF
     }
 
     # Automatic expansion of the third and fourth partitions on first boot
-    echo "yes" >root/.todo_rootfs_resize
+    #echo "yes" >root/.todo_rootfs_resize
 
     # Relink the kmod binary and its symlinks
     [[ -x "sbin/kmod" ]] && (
         kmod_list="depmod insmod lsmod modinfo modprobe rmmod"
         for ki in ${kmod_list}; do
-            rm -f sbin/${ki}
+            mv -f sbin/${ki} sbin/${ki}.orig
             ln -sf kmod sbin/${ki}
         done
     )
 
     # Add wireless master mode
-    wireless_mac80211="lib/netifd/wireless/mac80211.sh"
-    [[ -f "${wireless_mac80211}" ]] && {
-        cp -f ${wireless_mac80211} ${wireless_mac80211}.bak
-        sed -i "s|iw |ipconfig |g" ${wireless_mac80211}
-    }
+    #wireless_mac80211="lib/netifd/wireless/mac80211.sh"
+    #[[ -f "${wireless_mac80211}" ]] && {
+    #    cp -f ${wireless_mac80211} ${wireless_mac80211}.bak
+    #    sed -i "s|iw |ipconfig |g" ${wireless_mac80211}
+    #}
 
     # Generate random MAC address
     mac_hexchars="0123456789ABCDEF"
@@ -1227,14 +1238,14 @@ EOF
     )
 
     # Add firmware version information to the terminal banner
-    [[ -n "${builder_name}" ]] && builder_display="Builder Name: ${builder_name} | " || builder_display=""
-    [[ -f "etc/banner" ]] && {
-        echo " Install OpenWrt: System → Amlogic Service → Install OpenWrt" >>etc/banner
-        echo " Update  OpenWrt: System → Amlogic Service → Online  Update" >>etc/banner
-        echo " Board: ${board} | OpenWrt Kernel: ${kernel_name}" >>etc/banner
-        echo " ${builder_display}Production Date: $(date +%Y-%m-%d)" >>etc/banner
-        echo "───────────────────────────────────────────────────────────────────────" >>etc/banner
-    }
+    #[[ -n "${builder_name}" ]] && builder_display="Builder Name: ${builder_name} | " || builder_display=""
+    #[[ -f "etc/banner" ]] && {
+    #    echo " Install OpenWrt: System → Amlogic Service → Install OpenWrt" >>etc/banner
+    #    echo " Update  OpenWrt: System → Amlogic Service → Online  Update" >>etc/banner
+    #    echo " Board: ${board} | OpenWrt Kernel: ${kernel_name}" >>etc/banner
+    #    echo " ${builder_display}Production Date: $(date +%Y-%m-%d)" >>etc/banner
+    #    echo "───────────────────────────────────────────────────────────────────────" >>etc/banner
+    #}
 
     # Add firmware information
     release_lines=(
