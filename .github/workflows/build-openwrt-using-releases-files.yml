@@ -12,17 +12,18 @@ on:
       source_branch:
         description: "Select the source branch"
         required: false
-        default: "all"
+        default: "immortalwrt_v23.05.7"
         type: choice
         options:
           - all
           - openwrt_main
           - lede_master
           - immortalwrt_master
+          - immortalwrt_v23.05.7
       openwrt_board:
         description: "Select device board"
         required: false
-        default: "all"
+        default: "s905x"
         type: choice
         options:
           - all
@@ -251,7 +252,7 @@ on:
       openwrt_kernel:
         description: "Select kernel version"
         required: false
-        default: "6.12.y_6.18.y"
+        default: "5.15.y"
         type: choice
         options:
           - 5.10.y
@@ -273,10 +274,12 @@ on:
       kernel_repo:
         description: "Set the kernel repository"
         required: false
-        default: "ophub/kernel"
+        default: "guplax/amlogic-s9xxx-armbian"
         type: choice
         options:
+          - guplax/amlogic-s9xxx-armbian
           - ophub/kernel
+          - syntax-xidz/kernel
       kernel_usage:
         description: "Set the tags of the stable kernel."
         required: false
@@ -286,10 +289,6 @@ on:
           - stable
           - flippy
           - beta
-      openwrt_ip:
-        description: "Set OpenWrt default IP address."
-        required: false
-        default: "192.168.1.1"
       openwrt_storage:
         description: "Select image storage type."
         required: false
@@ -301,9 +300,10 @@ on:
       builder_name:
         description: "Set OpenWrt builder signature."
         required: false
-        default: "ophub"
+        default: "guplax"
         type: choice
         options:
+          - guplax
           - ophub
           - angel
           - yourname
@@ -321,7 +321,7 @@ jobs:
         id: set-matrix
         run: |
           if [[ "${{ inputs.source_branch }}" == "all" ]]; then
-            MATRIX='{"include":[{"branch":"openwrt_main"},{"branch":"lede_master"},{"branch":"immortalwrt_master"}]}'
+            MATRIX='{"include":[{"branch":"openwrt_main"},{"branch":"lede_master"},{"branch":"immortalwrt_master"},{"branch":"immortalwrt_v23.05.7"}]}'
           else
             MATRIX='{"include":[{"branch":"${{ inputs.source_branch }}"}]}'
           fi
@@ -410,7 +410,7 @@ jobs:
           armsr_tarfile_path="openwrt/output"
           [[ -d "${armsr_tarfile_path}" ]] || mkdir -p ${armsr_tarfile_path}
           ln -sf /builder/openwrt ${{ github.workspace }}/openwrt
-          ln -sf /builder/openwrt /home/runner/work/_actions/ophub/amlogic-s9xxx-openwrt/main/openwrt
+          ln -sf /builder/openwrt /home/runner/work/_actions/guplax/amlogic-s9xxx-openwrt/emortal/openwrt
 
           # Query the latest release asset via GitHub API
           latest_version=$(curl -s \
@@ -453,10 +453,9 @@ jobs:
 
       - name: Package OpenWrt for target boards
         if: ${{ steps.down.outputs.status == 'success' && !cancelled() }}
-        uses: ophub/amlogic-s9xxx-openwrt@main
+        uses: guplax/amlogic-s9xxx-openwrt@emortal
         with:
           openwrt_path: openwrt/output/*rootfs.tar.gz
-          openwrt_ip: ${{ inputs.openwrt_ip }}
           openwrt_board: ${{ inputs.openwrt_board }}
           openwrt_kernel: ${{ inputs.openwrt_kernel }}
           auto_kernel: ${{ inputs.auto_kernel }}
@@ -479,8 +478,7 @@ jobs:
             ### OpenWrt Image Information
             - Default IP: `192.168.1.1`
             - Default username: `root`
-            - Default password: `password`
-            - Default WIFI name: `OpenWrt`
+            - Default WIFI name: `ImmortalWrt`
             - Default WIFI password: `none`
             ### Install to EMMC
             - Login to OpenWrt → `System` → `Amlogic Service` → `Install OpenWrt`
