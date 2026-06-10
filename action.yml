@@ -7,7 +7,7 @@ inputs:
     required: false
     default: "ophub"
   openwrt_path:
-    description: "Select armsr-armv8 file path."
+    description: "Select armvirt-64 file path."
     required: false
     default: "openwrt/bin/targets/*/*/*rootfs.tar.gz"
   openwrt_board:
@@ -57,7 +57,7 @@ runs:
 
         openwrt_filename="${{ inputs.openwrt_path }}"
         openwrt_savefile="${openwrt_filename##*/}"
-        openwrt_savepath="openwrt-armsr"
+        openwrt_savepath="openwrt-armvirt"
         openwrt_outpath="openwrt/out"
         echo -e "OpenWrt rootfs input path: [ ${openwrt_filename} ]"
         [[ -z "${openwrt_filename}" ]] && echo -e "The [ openwrt_path ] parameter is required but not specified." && exit 1

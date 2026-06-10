@@ -12,17 +12,18 @@ on:
       source_branch:
         description: "Select the source branch"
         required: false
-        default: "all"
+        default: "immortalwrt_v21.02.7"
         type: choice
         options:
           - all
           - openwrt_main
           - lede_master
           - immortalwrt_master
+          - immortalwrt_v21.02.7
       openwrt_board:
         description: "Select device board"
         required: false
-        default: "all"
+        default: "s905x"
         type: choice
         options:
           - all
@@ -251,9 +252,10 @@ on:
       openwrt_kernel:
         description: "Select kernel version"
         required: false
-        default: "6.12.y_6.18.y"
+        default: "5.4.y"
         type: choice
         options:
+          - 5.4.y
           - 5.10.y
           - 5.15.y
           - 6.1.y
@@ -276,24 +278,21 @@ on:
         default: "ophub/kernel"
         type: choice
         options:
+          - guplax/amlogic-s9xxx-armbian
           - ophub/kernel
       kernel_usage:
         description: "Set the tags of the stable kernel."
         required: false
-        default: "stable"
+        default: "flippy"
         type: choice
         options:
           - stable
           - flippy
           - beta
-      openwrt_ip:
-        description: "Set OpenWrt default IP address."
-        required: false
-        default: "192.168.1.1"
       use_ccache:
         description: "Auto use ccache."
         required: false
-        default: true
+        default: false
         type: boolean
       openwrt_storage:
         description: "Select image storage type."
@@ -306,9 +305,10 @@ on:
       builder_name:
         description: "Set OpenWrt builder signature."
         required: false
-        default: "ophub"
+        default: "guplax"
         type: choice
         options:
+          - guplax
           - ophub
           - angel
           - yourname
@@ -327,7 +327,7 @@ jobs:
         id: set-matrix
         run: |
           if [[ "${{ inputs.source_branch }}" == "all" ]]; then
-            MATRIX='{"include":[{"branch":"openwrt_main"},{"branch":"lede_master"},{"branch":"immortalwrt_master"}]}'
+            MATRIX='{"include":[{"branch":"openwrt_main"},{"branch":"lede_master"},{"branch":"immortalwrt_master"},{"branch":"immortalwrt_v21.02.7"}]}'
           else
             MATRIX='{"include":[{"branch":"${{ inputs.source_branch }}"}]}'
           fi
@@ -424,7 +424,7 @@ jobs:
           # Clone the source code repository
           git clone -q --single-branch --depth=1 --branch=${REPO_BRANCH} ${REPO_URL} openwrt
           ln -sf /builder/openwrt ${{ github.workspace }}/openwrt
-          ln -sf /builder/openwrt /home/runner/work/_actions/ophub/amlogic-s9xxx-openwrt/main/openwrt
+          ln -sf /builder/openwrt /home/runner/work/_actions/guplax/amlogic-s9xxx-openwrt/emortal21/openwrt
 
           # Export build metadata
           echo "build_tag=OpenWrt_${{ matrix.branch }}_${{ inputs.openwrt_storage }}_$(date +"%Y.%m")" >> ${GITHUB_ENV}
@@ -454,7 +454,7 @@ jobs:
           [[ -e "${CONFIG_FILE}" ]] && cp -f ${CONFIG_FILE} openwrt/.config
           chmod +x ${DIY_P2_SH}
           cd openwrt/
-          ${{ github.workspace }}/${DIY_P2_SH} "${{ inputs.openwrt_ip }}" "${{ inputs.use_ccache }}"
+          ${{ github.workspace }}/${DIY_P2_SH} "${{ inputs.use_ccache }}"
 
       - name: Download package
         id: package
@@ -532,10 +532,9 @@ jobs:
 
       - name: Package OpenWrt for target boards
         if: ${{ steps.clean.outputs.status == 'success' && !cancelled() }}
-        uses: ophub/amlogic-s9xxx-openwrt@main
+        uses: guplax/amlogic-s9xxx-openwrt@emortal21
         with:
           openwrt_path: openwrt/output/*rootfs.tar.gz
-          openwrt_ip: ${{ inputs.openwrt_ip }}
           openwrt_board: ${{ inputs.openwrt_board }}
           openwrt_kernel: ${{ inputs.openwrt_kernel }}
           auto_kernel: ${{ inputs.auto_kernel }}
@@ -558,8 +557,7 @@ jobs:
             ### OpenWrt Image Information
             - Default IP: `192.168.1.1`
             - Default username: `root`
-            - Default password: `password`
-            - Default WIFI name: `OpenWrt`
+            - Default WIFI name: `ImmortalWrt`
             - Default WIFI password: `none`
             ### Install to EMMC
             - Login to OpenWrt → `System` → `Amlogic Service` → `Install OpenWrt`
