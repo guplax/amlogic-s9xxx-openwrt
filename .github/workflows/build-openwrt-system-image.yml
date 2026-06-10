@@ -454,7 +454,7 @@ jobs:
           [[ -e "${CONFIG_FILE}" ]] && cp -f ${CONFIG_FILE} openwrt/.config
           chmod +x ${DIY_P2_SH}
           cd openwrt/
-          ${{ github.workspace }}/${DIY_P2_SH} "${{ inputs.use_ccache }}"
+          ${{ github.workspace }}/${DIY_P2_SH} "${{ inputs.use_ccache }}" "${{ github.workspace }}"
 
       - name: Download package
         id: package

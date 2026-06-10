@@ -51,6 +51,6 @@ git clone -b lua https://github.com/ophub/luci-app-amlogic.git package/luci-app-
 #
 # Apply patches
 # git apply ../config/patches/{0001*,0002*}.patch --directory=feeds/luci
-git apply ../config/immortalwrt_v21.02.7/patches/0001-openvswitch-disable-groff-manpage-check.patch --directory=feeds/packages
+git apply "${2}/config/immortalwrt_v21.02.7/patches/0001-openvswitch-disable-groff-manpage-check.patch" --directory=feeds/packages
 #
 # ------------------------------- Additional customizations ends -------------------------------
