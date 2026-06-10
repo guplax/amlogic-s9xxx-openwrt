@@ -47,12 +47,10 @@ fi
 #
 # Add luci-app-amlogic
 rm -rf package/luci-app-amlogic
-git clone -b main https://github.com/ophub/luci-app-amlogic.git package/luci-app-amlogic
-pushd package/luci-app-amlogic > /dev/null
-git checkout be6b81bc454e60385f7e54eaaa7ce082fb880d11
-popd > /dev/null
+git clone -b lua https://github.com/ophub/luci-app-amlogic.git package/luci-app-amlogic
 #
 # Apply patches
 # git apply ../config/patches/{0001*,0002*}.patch --directory=feeds/luci
+git apply ../config/immortalwrt_v21.02.7/patches/0001-openvswitch-disable-groff-manpage-check.patch --directory=feeds/packages
 #
 # ------------------------------- Additional customizations ends -------------------------------

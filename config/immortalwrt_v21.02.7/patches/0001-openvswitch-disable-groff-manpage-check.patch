@@ -1,0 +1,25 @@
+From b738c265979cecdbf1b2c74c3bd063c8d14dac07 Mon Sep 17 00:00:00 2001
+From: Guplax <198092412+guplax@users.noreply.github.com>
+Date: Wed, 10 Jun 2026 21:30:52 +0000
+Subject: [PATCH] openvswitch: disable groff manpage check
+
+Fix "an.tmac:lib/ovs-fields.7:762: warning: tbl preprocessor failed, or it or soelim was not run; table(s) likely not rendered (TE macro called with TW register undefined)"
+---
+ net/openvswitch/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/openvswitch/Makefile b/net/openvswitch/Makefile
+index 8e9bbf298..59c6ac690 100644
+--- a/net/openvswitch/Makefile
++++ b/net/openvswitch/Makefile
+@@ -244,6 +244,7 @@ CONFIGURE_ARGS+= \
+ 
+ CONFIGURE_VARS += \
+ 	ovs_cv_flake8=no \
++	ovs_cv_groff=no \
+ 	ovs_cv_python3=$(PYTHON3) \
+ 	ovs_cv_python3_host=$(HOST_PYTHON3_BIN) \
+ 	SPHINXBUILD=none \
+-- 
+2.43.0
+
