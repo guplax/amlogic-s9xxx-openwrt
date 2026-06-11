@@ -275,7 +275,7 @@ on:
       kernel_repo:
         description: "Set the kernel repository"
         required: false
-        default: "ophub/kernel"
+        default: "guplax/amlogic-s9xxx-armbian"
         type: choice
         options:
           - guplax/amlogic-s9xxx-armbian
@@ -283,7 +283,7 @@ on:
       kernel_usage:
         description: "Set the tags of the stable kernel."
         required: false
-        default: "flippy"
+        default: "stable"
         type: choice
         options:
           - stable
